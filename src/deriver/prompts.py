@@ -49,6 +49,12 @@ Messages to analyze:
 <messages>
 {messages}
 </messages>
+
+You MUST respond with a JSON object in exactly this format, no other text:
+{{"explicit": [{{"content": "observation 1"}}, {{"content": "observation 2"}}]}}
+
+Each item in the "explicit" array must be an object with a "content" key containing the observation string.
+Do NOT include any markdown, headers, or explanation. Output ONLY the JSON object.
 """
     )
 

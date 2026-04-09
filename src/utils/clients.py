@@ -1898,14 +1898,16 @@ async def honcho_llm_call_inner(
             if json_mode and provider != "vllm":
                 openai_params["response_format"] = {"type": "json_object"}
 
-            # custom shim for vLLM response model formatting
+            # Structured output shim for vLLM and custom providers.
+            # Sends json_schema explicitly and uses repair pipeline for resilience.
             # NOTE: this is all specific to the Representation model.
             # Do not call with any other response model.
-            if provider == "vllm" and response_model:
+            if provider in ("vllm", "custom") and response_model:
                 if response_model is not PromptRepresentation:
                     raise NotImplementedError(
                         "vLLM structured output currently supports only PromptRepresentation"
                     )
+                logger.info(f"Using json_schema structured output path for provider={provider}, model={model}")
                 openai_params["response_format"] = {
                     "type": "json_schema",
                     "json_schema": {
@@ -1928,6 +1930,7 @@ async def honcho_llm_call_inner(
                     if vllm_response.choices[0].message.content is not None:
                         test_rep = vllm_response.choices[0].message.content
 
+                    logger.info(f"Raw LLM response (first 500 chars): {test_rep[:500]}")
                     final = validate_and_repair_json(test_rep)
 
                     # Schema-aware repair: ensure deductive observations have required fields
@@ -1966,9 +1969,10 @@ async def honcho_llm_call_inner(
 
                 try:
                     response_obj = PromptRepresentation.model_validate_json(final)
+                    logger.info(f"Structured output parsed successfully: {len(response_obj.explicit)} explicit observations")
                 except ValidationError as e:
                     logger.error(f"Validation error after repair: {e}")
-                    logger.debug(f"Problematic JSON: {final}")
+                    logger.info(f"Problematic JSON (first 500 chars): {final[:500]}")
 
                     # Fallback: return empty response rather than failing
                     logger.warning(
