@@ -42,7 +42,7 @@ class _EmbeddingClient:
             self.max_batch_size: int = 100
         elif self.provider == "openrouter":
             if api_key is None:
-                api_key = settings.LLM.OPENAI_COMPATIBLE_API_KEY
+                api_key = settings.LLM.OPENROUTER_API_KEY or settings.LLM.OPENAI_COMPATIBLE_API_KEY
             if not api_key:
                 raise ValueError(
                     "OpenRouter API key (LLM_OPENAI_COMPATIBLE_API_KEY) is required"
@@ -381,7 +381,7 @@ class EmbeddingClient:
                     if provider == "gemini":
                         api_key = settings.LLM.GEMINI_API_KEY
                     elif provider == "openrouter":
-                        api_key = settings.LLM.OPENAI_COMPATIBLE_API_KEY
+                        api_key = settings.LLM.OPENROUTER_API_KEY or settings.LLM.OPENAI_COMPATIBLE_API_KEY
                     else:
                         api_key = settings.LLM.OPENAI_API_KEY
 
