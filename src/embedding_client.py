@@ -47,10 +47,7 @@ class _EmbeddingClient:
                 raise ValueError(
                     "OpenRouter API key (LLM_OPENAI_COMPATIBLE_API_KEY) is required"
                 )
-            base_url = (
-                settings.LLM.OPENAI_COMPATIBLE_BASE_URL
-                or "https://openrouter.ai/api/v1"
-            )
+            base_url = "https://openrouter.ai/api/v1"
             self.client = AsyncOpenAI(api_key=api_key, base_url=base_url)
             self.model = "openai/text-embedding-3-small"
             self.max_embedding_tokens = settings.MAX_EMBEDDING_TOKENS
